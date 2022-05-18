@@ -102,7 +102,30 @@ public:
     }
 
 
-    pnode balance(pnode v){
+    std::string print_tree_tex(pnode v){
+        if(v == nullptr){
+            return "nil";
+        }
+        return std::to_string(v->key) + ", " + print_tree_tex(v->l) + ", " + print_tree_tex(v->r);
+    }
+
+
+    void print_tree_tex(){
+        std::cout << "\\begin{center}" << "\n";
+        std::cout << "\\begin{asy}" << "\n";
+        std::cout << "import binarytree;" << "\n";
+        std::string bt = "bt";
+        std::string pc = "pic";
+        std::cout << "picture " << pc << ";" << "\n";
+        std::cout << "binarytree " << bt << " = " << "binarytree(" << print_tree_tex(root) << ");" << "\n";
+        std::cout << "draw(" << pc << ", " << bt << ", condensed=true);" << "\n";
+        std::cout << "add(" << pc << ".fit(), (0, 0), 10N);" << "\n";
+        std::cout << "\\end{asy}" << "\n";
+        std::cout << "\\end{center}" << "\n";
+    }
+
+
+    pnode balance(pnode v, bool prnt = false){
         int lh = v->get_left_height();
         int rh = v->get_right_height();
         int balance = (lh - rh);
@@ -111,31 +134,23 @@ public:
                 v->r = rotate_right(v->r);
                 v->update();
             }
-            return rotate_left(v);
+            auto rs = rotate_left(v);
+            if(prnt){
+                print_tree_tex();
+            }
+            return rs;
         } else if(lh == rh + 2){
             if(v->l->get_left_height() < v->l->get_right_height()){
                 v->l = rotate_left(v->l);
                 v->update();
             }
-            return rotate_right(v);
+            auto rs = rotate_right(v);
+            if(prnt){
+                print_tree_tex();
+            }
+            return rs;
         }
         return v;
-    }
-
-
-    pnode insert(pnode v, pnode d){
-        if(v == nullptr){
-            return d;
-        }
-        if(v->key <= d->key){
-            v->r = insert(v->r, d);
-            v->update();
-            return balance(v);
-        } else{
-            v->l = insert(v->l, d);
-            v->update();
-            return balance(v);
-        }
     }
 
 
@@ -282,6 +297,66 @@ public:
 
 
     pnode root = nullptr;
+
+
+    pnode insert(pnode v, pnode d){
+        if(v == nullptr){
+            return d;
+        }
+        if(v->key <= d->key){
+            v->r = insert(v->r, d);
+            v->update();
+            return balance(v);
+        } else{
+            v->l = insert(v->l, d);
+            v->update();
+            return balance(v);
+        }
+    }
+
+
+    void print_insert(const Key &k){
+        print_tree_tex();
+        pnode v = root;
+        std::vector<pnode> a;
+        std::vector<int> x;
+        while(1){
+            a.push_back(v);
+            if(v->key <= k){
+                x.push_back(1);
+                if(v->r == nullptr){
+                    v->r = new node<Key>(k);
+                    break;
+                }
+                v = v->r;
+            } else{
+                x.push_back(0);
+                if(v->l == nullptr){
+                    v->l = new node<Key>(k);
+                    break;
+                }
+                v = v->l;
+            }
+        }
+        while(!a.empty()){
+            v = a.back();
+            a.pop_back();
+            x.pop_back();
+            v->update();
+            v = balance(v);
+            if(!a.empty()){
+                if(x.back() == 0){
+                    a.back()->l = v;
+                } else{
+                    a.back()->r = v;
+                }
+            } else{
+                root = v;
+            }
+            print_tree_tex();
+        }
+
+    }
 
 
     void insert(const Key &k){

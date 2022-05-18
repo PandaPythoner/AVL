@@ -38,6 +38,17 @@ void help(){
 
 int32_t main() {
     AVL<int> a;
+    for(int i = 0; i < 10; i += 1){
+        a.insert(rnd() % 100 + 1);
+    }
+    cout << "Tree: " << "\n";
+    a.print_tree_tex();
+    for(int i = 0; i < 3; i += 1){
+        int x = rnd() % 100 + 1;
+        cout << "Adding element " << x << " :" << "\n";
+        a.print_insert(x);
+    }
+    /*
     help();
     while(1){
         string s;
@@ -76,5 +87,6 @@ int32_t main() {
             help();
         }
     }
+    */
     return 0;
 }
